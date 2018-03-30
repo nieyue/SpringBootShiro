@@ -1,0 +1,37 @@
+server:
+  port: 8080
+  session:
+    #timeout: 1800
+    timeout: 1296000 #1个月
+    cookie: 
+      name: SESSION
+  tomcat: 
+    max-threads: 1000
+    min-spare-threads: 200
+    accept-count: 1000
+    max-connections: 1000
+ # connection-timeout: 60 
+spring:
+   datasource:
+     name: master
+     driver-class-name: com.mysql.jdbc.Driver
+     url: jdbc:mysql://118.190.133.146:3306/shiro_db
+     username: root
+     password: liliu
+   redis:
+     host: 120.77.253.90
+     password: liliu
+     port: 6379
+     database: 0
+     timeout: 3000
+     pool:
+       min-idle: 100
+       max-idle: 300
+       max-active: 800
+myPugin: 
+  session: 
+    myDomainName: jiehao9.cn
+  projectName: Shrio
+  requestAuth: requestAuthProd
+  activationCodeMallProjectDomainUrl: http://app.jiehao9.com
+  activationCodeMallClientDomainUrl: http://mall.jiehao9.com
