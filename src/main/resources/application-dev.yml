@@ -37,5 +37,5 @@ myPugin:
     myDomainName: null
   projectName: Shrio
   requestAuth: requestAuthDev
-  activationCodeMallProjectDomainUrl: http://192.168.7.111:6000
-  activationCodeMallClientDomainUrl: http://192.168.7.111:6000
+  activationCodeMallProjectDomainUrl: http://192.168.7.111:8080
+  activationCodeMallClientDomainUrl: http://192.168.7.111:8080

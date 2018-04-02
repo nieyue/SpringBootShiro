@@ -1,6 +1,7 @@
 package com.nieyue.shiro;
 
 import com.nieyue.bean.Permission;
+import com.nieyue.service.PermissionService;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
@@ -19,10 +20,7 @@ import org.springframework.util.StringUtils;
 import redis.clients.jedis.JedisPoolConfig;
 
 import javax.servlet.Filter;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author: 聂跃
@@ -51,47 +49,37 @@ public class ShiroConfiguration {
     Integer redispoolmaxidle;
     @Value("${spring.redis.pool.max-active}")
     Integer redispoolmaxactive;
+    @Autowired
+    private PermissionService permissionService;
     private static final Logger logger = LoggerFactory.getLogger(ShiroConfiguration.class);
 
     /**
      * 初始化权限
      */
-    public Map<String, String> loadFilterChainDefinitions(Set<Permission> s) {
+    public Map<String, String> loadFilterChainDefinitions(List<Permission> permissionList) {
         // 权限控制map.从数据库获取
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<String, String>();
          /* 过滤链定义，从上向下顺序执行，一般将 / ** 放在最为下边:这是一个坑呢，一不小心代码就不好使了;
           authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访问 */
-        // System.out.println(request.getRequestURI());
-        filterChainDefinitionMap.put("/", "anon");
+        //filterChainDefinitionMap.put("/", "anon");
+        //静态资源开放
         filterChainDefinitionMap.put("/static/**", "anon");
-        filterChainDefinitionMap.put("/test/**", "anon");
-        filterChainDefinitionMap.put("/account/login", "anon");
-        //filterChainDefinitionMap.put("/account/logout", "anon");
-        //filterChainDefinitionMap.put("/account/islogout", "anon");
-        filterChainDefinitionMap.put("/error", "anon");
-        //filterChainDefinitionMap.put("/**", "authc,perms[/account/list]");
-        //从数据库获取
-        Set<Permission> set = new HashSet<>();
-        Permission permission=new Permission();
-        permission.setRoute("/account/list");
-        set.add(permission);
-        Permission permission2=new Permission();
-        permission2.setRoute("/account/load");
-        set.add(permission2);
-        Permission permission3=new Permission();
-        permission3.setRoute("/account/islogin");
-        set.add(permission3);
-        if(!StringUtils.isEmpty(s)){
-            set.addAll(s);
-        }
-        for (Permission per : set) {
-            filterChainDefinitionMap.put(per.getRoute(),
-                    "authc,perms["+per.getRoute()+"]");
+        //动态权限
+        for (Permission per : permissionList) {
+            //公共的开放的
+            if(per.getType().equals(0)){
+                filterChainDefinitionMap.put(per.getRoute(), "anon");
+            }
+            //需要登录的，需要权限的
+            if(per.getType().equals(1)){
+                filterChainDefinitionMap.put(per.getRoute(),
+                        "authc,perms["+per.getRoute()+"]");
+            }
         }
         //filterChainDefinitionMap.put("/**", "authc,roles[超级管理员]");
-        System.err.println(filterChainDefinitionMap);
         return filterChainDefinitionMap;
     }
+
     /**
      * Shiro的Web过滤器Factory 命名:shiroFilter
      */
@@ -102,12 +90,13 @@ public class ShiroConfiguration {
         shiroFilterFactoryBean.setSecurityManager(securityManager);
         Map<String, Filter> filterMap = new LinkedHashMap<>();
         // 如果不设置默认会自动寻找Web工程根目录下的"/login.jsp"页面
-        shiroFilterFactoryBean.setLoginUrl("/test/unauth");
+        //shiroFilterFactoryBean.setLoginUrl("/test/unauth");
         // 登录成功后要跳转的链接
-        shiroFilterFactoryBean.setSuccessUrl("/test/sessionid");
+        //shiroFilterFactoryBean.setSuccessUrl("/test/sessionid");
         // 未授权界面;
-        shiroFilterFactoryBean.setUnauthorizedUrl("/test/unauth");
-        filterMap.put("authc", new MyFormAuthenticationFilter());//对没登录的过滤
+       // shiroFilterFactoryBean.setUnauthorizedUrl("/test/unauth");
+
+        filterMap.put("authc", new MyAuthenticationFilter());//对没有登陆的，需要跳转的过滤
         filterMap.put("perms", new MyPermissionsAuthorizationFilter());//对权限过滤
         shiroFilterFactoryBean.setFilters(filterMap);
         /*定义shiro过滤链  Map结构
@@ -117,7 +106,9 @@ public class ShiroConfiguration {
          */
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
         //初始化
-        filterChainDefinitionMap=loadFilterChainDefinitions(null);
+        //从数据库获取
+        List<Permission> permissionList = permissionService.browsePagingPermission(null, null, null, null, 1, Integer.MAX_VALUE, "permission_id", "asc");
+        filterChainDefinitionMap=loadFilterChainDefinitions(permissionList);
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         return shiroFilterFactoryBean;
     }

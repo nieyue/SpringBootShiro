@@ -1,28 +1,29 @@
 package com.nieyue.shiro;
 
 import com.nieyue.bean.Account;
+import com.nieyue.bean.RolePermission;
 import com.nieyue.exception.AccountLoginException;
 import com.nieyue.service.AccountService;
-import com.nieyue.util.MyDESutil;
+import com.nieyue.service.RolePermissionService;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.*;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.AuthenticationInfo;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
-import org.apache.shiro.mgt.SessionsSecurityManager;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.session.Session;
-import org.apache.shiro.session.mgt.DefaultSessionManager;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-
-import static org.apache.shiro.web.filter.mgt.DefaultFilter.user;
 
 /**
  * @author: 聂跃
@@ -34,6 +35,8 @@ public class AccountRealm extends AuthorizingRealm {
 
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private RolePermissionService rolePermissionService;
 
     /**
      * 登陆之后调用,注册当前用户角色、权限
@@ -46,20 +49,19 @@ public class AccountRealm extends AuthorizingRealm {
         //查询用户的权限
         Account account = (Account) session.getAttribute("account");
         //Object account = session.getAttribute("account");
-
         logger.info(account.toString());
         //为当前用户设置角色和权限
         SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
-        Set<String> set=new HashSet<>();
-        set.add("a");
-        set.add("/account/list");
-        set.add("c");
-        logger.info("sddddddddd");
-//        Set<String> set2=new HashSet<>();
-//        set2.add("超级管理员");
-//        set2.add("第三方");
-//        authorizationInfo.addRoles(set2);
-        authorizationInfo.addStringPermissions(set);
+        //获取账户权限
+        //将自身权限列表放入session
+        List<RolePermission> rpl = (ArrayList<RolePermission>)session.getAttribute("rolePermissionList");
+        List<String> rolePermissionList=new ArrayList<>();
+        rpl.forEach((rp)->{
+            rolePermissionList.add(rp.getPermission().getRoute());//放置自身权限路径
+        });
+        System.out.println(111111);
+      // authorizationInfo.addRoles(set);
+        authorizationInfo.addStringPermissions(rolePermissionList);
         return authorizationInfo;
     }
 
@@ -90,6 +92,9 @@ public class AccountRealm extends AuthorizingRealm {
         );
         //将用户信息放入session中
         SecurityUtils.getSubject().getSession().setAttribute("account", account);
+        List<RolePermission> rolePermissionList = rolePermissionService.browsePagingRolePermission(null, account.getRoleId(), null, 1, Integer.MAX_VALUE, "role_permission_id", "asc");
+       //权限放入session
+        SecurityUtils.getSubject().getSession().setAttribute("rolePermissionList", rolePermissionList);
 
         //处理session
 //        SessionsSecurityManager securityManager = (SessionsSecurityManager) SecurityUtils.getSecurityManager();

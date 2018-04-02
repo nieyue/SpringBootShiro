@@ -11,10 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 服务
@@ -36,7 +33,7 @@ public class ShiroService {
     /**
      * 重新加载权限
      */
-    public Map<String, String> updatePermission(Set<Permission> s) {
+    public Map<String, String> updatePermission(List<Permission> s) {
         synchronized (shiroFilterFactoryBean) {
 
             AbstractShiroFilter shiroFilter = null;
