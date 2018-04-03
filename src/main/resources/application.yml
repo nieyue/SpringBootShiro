@@ -37,4 +37,3 @@ spring:
     #active: prod
   session:
     store-type: none
-

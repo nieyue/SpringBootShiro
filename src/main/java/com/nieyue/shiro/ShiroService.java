@@ -2,16 +2,15 @@ package com.nieyue.shiro;
 
 import com.nieyue.bean.Permission;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
-import org.apache.shiro.web.filter.authz.AuthorizationFilter;
 import org.apache.shiro.web.filter.mgt.DefaultFilterChainManager;
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver;
 import org.apache.shiro.web.servlet.AbstractShiroFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 服务
@@ -26,10 +25,8 @@ public class ShiroService {
     ShiroConfiguration shiroConfiguration;
     @Autowired
     ShiroFilterFactoryBean shiroFilterFactoryBean;
-
     //@Autowired
    // PermissionService permissionService;
-
     /**
      * 重新加载权限
      */
@@ -65,8 +62,8 @@ public class ShiroService {
                         .replace(" ", "");
                 manager.createChain(url, chainDefinition);
             }
-            System.err.println(chains);
-            System.err.println("更新权限成功！！");
+           // System.err.println(chains);
+           // System.err.println("更新权限成功！！");
             return chains;
         }
     }

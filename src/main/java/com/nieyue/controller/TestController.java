@@ -9,6 +9,7 @@ import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.service.PermissionService;
 import com.nieyue.service.RolePermissionService;
 import com.nieyue.shiro.ShiroService;
+import com.nieyue.shiro.ShiroUtil;
 import com.nieyue.util.HttpClientUtil;
 import com.nieyue.util.MyDESutil;
 import io.swagger.annotations.Api;
@@ -47,8 +48,8 @@ public class TestController {
     PermissionService permissionService;
     @Autowired
     RolePermissionService rolePermissionService;
-    @Value("${myPugin.activationCodeMallProjectDomainUrl}")
-    String activationCodeMallProjectDomainUrl;
+    @Autowired
+    ShiroUtil shiroUtil;
     @RequestMapping("/one")
     @ApiOperation(value = "测一测", notes = "测一测")
     boolean getOne(
@@ -75,38 +76,7 @@ public class TestController {
     @ResponseBody
     public boolean unauth() throws Exception {
         boolean b=false;
-        //String s = HttpClientUtil.doGet("http://server.laoyeshuo.cn/v2/api-docs");
-        String s = HttpClientUtil.doGet(activationCodeMallProjectDomainUrl+"/v2/api-docs");
-        JSONObject json = JSONObject.fromObject(s);
-        Map<String, Class> classMap = new HashMap<String, Class>();
-        classMap.put("tags", Tag.class);
-        Map<String,Class> pathMap = new HashMap<String, Class>();
-        classMap.put("paths",pathMap.getClass());
-        Swagger swagger= (Swagger) JSONObject.toBean(json, Swagger.class,classMap);
-        List<Tag> tagslist=swagger.getTags();
-        Map<String,Path> pathsMap=swagger.getPaths();
-        for (Map.Entry<String, Path>  entry: pathsMap.entrySet()) {
-            //System.out.println(entry.getKey());
-            Permission permission =new Permission();
-            // System.out.println(entry.getValue());
-            JSONObject js=JSONObject.fromObject(entry.getValue());
-            //System.out.println(js.get("post"));
-            JSONObject ss=JSONObject.fromObject(js.get("post"));
-            //System.out.println(ss.get("summary"));
-            JSONArray sss=JSONArray.fromObject(ss.get("tags"));
-            for (int i = 0; i < tagslist.size(); i++) {
-                if(sss.get(0).equals(tagslist.get(i).getName())){
-                   // System.out.println(sss.get(0));
-                    //System.out.println(tagslist.get(i).getDescription());
-                    permission.setManagerName(tagslist.get(i).getDescription());//权限管理名称
-                    permission.setName(ss.get("summary").toString());//权限名称
-                    permission.setRoute(entry.getKey());//权限路由
-                    permission.setType(1);//默认鉴权
-                     b=permissionService.addPermission(permission);
-                   // System.out.println("---------------------");
-                }
-            }
-        }
+        b=shiroUtil.initPermission();
         return b;
     }
     /**
@@ -118,7 +88,7 @@ public class TestController {
     @ResponseBody
     public String getSessionId(HttpSession session) {
 
-        return session.getId();
+        return session.getId()+"sdfr";
     }
     static AtomicInteger a=new AtomicInteger(1);
     /**

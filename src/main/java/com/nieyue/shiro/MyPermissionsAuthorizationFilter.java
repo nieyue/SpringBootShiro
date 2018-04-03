@@ -56,12 +56,17 @@ public class MyPermissionsAuthorizationFilter extends PermissionsAuthorizationFi
                 isPermitted = false;
             }
             for (RolePermission rp : rolePermissionList) {
-                    //当前账户只有 自身 操作权限的，accountId必须与session中的account.getAccountId一致，否则不行
-                if(rp.getRegion().equals(2) && !account.getAccountId().toString().equals( request.getParameter("accountId"))){
-                    System.out.println(account.getAccountId());
-                    System.err.println(request.getParameter("accountId"));
+                for (int i = 0; i < perms.length; i++) {
+                /*当前账户拥有的权限路径与来路路径一致，且是 自身 操作权限的情况下，
+                 ** accountId必须与session中的account.getAccountId不一致，
+                 * 表示当前账户只能操作自身id下的权限。
+                */
+                if(rp.getPermission().getRoute().equals(perms[i]) && rp.getRegion().equals(2) && !account.getAccountId().toString().equals( request.getParameter("accountId"))){
+                   // System.out.println(account.getAccountId());
+                    //System.err.println(request.getParameter("accountId"));
                     isPermitted = false;
                     }
+                }
             }
         }
 
