@@ -43,16 +43,22 @@ public class MyPermissionsAuthorizationFilter extends PermissionsAuthorizationFi
         Account account = (Account)subject.getSession().getAttribute("account");
         List<RolePermission> rolePermissionList = (List<RolePermission>) subject.getSession().getAttribute("rolePermissionList");
 
+        //超级管理员拥有所有权限
+//        if(account.getRoleName().equals("超级管理员")){
+//            return true;
+//        }
         //默认有权限
         boolean isPermitted = true;
         if(perms != null && perms.length > 0) {
             if(perms.length == 1) {
                 //当前账户没有当前路径权限
                 if(!subject.isPermitted(perms[0])) {
+                    // System.out.println(perms[0]);
                     isPermitted = false;
                 }
                 //当前账户没有当前所有路径权限
             } else if(!subject.isPermittedAll(perms)) {
+               // System.out.println(perms);
                 isPermitted = false;
             }
             for (RolePermission rp : rolePermissionList) {
@@ -61,8 +67,8 @@ public class MyPermissionsAuthorizationFilter extends PermissionsAuthorizationFi
                  ** accountId必须与session中的account.getAccountId不一致，
                  * 表示当前账户只能操作自身id下的权限。
                 */
-                if(rp.getPermission().getRoute().equals(perms[i]) && rp.getRegion().equals(2) && !account.getAccountId().toString().equals( request.getParameter("accountId"))){
-                   // System.out.println(account.getAccountId());
+                    if(rp.getPermission().getRoute().equals(perms[i]) && rp.getRegion().equals(2) && !account.getAccountId().toString().equals( request.getParameter("accountId"))){
+                    // System.out.println(account.getAccountId());
                     //System.err.println(request.getParameter("accountId"));
                     isPermitted = false;
                     }

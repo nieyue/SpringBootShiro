@@ -16,11 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.StringUtils;
 import redis.clients.jedis.JedisPoolConfig;
 
 import javax.servlet.Filter;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: 聂跃
@@ -50,7 +51,7 @@ public class ShiroConfiguration {
     @Value("${spring.redis.pool.max-active}")
     Integer redispoolmaxactive;
     @Autowired
-    private PermissionService permissionService;
+    PermissionService permissionService;
     private static final Logger logger = LoggerFactory.getLogger(ShiroConfiguration.class);
 
     /**

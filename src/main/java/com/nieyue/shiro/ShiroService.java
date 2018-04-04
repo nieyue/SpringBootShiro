@@ -6,7 +6,7 @@ import org.apache.shiro.web.filter.mgt.DefaultFilterChainManager;
 import org.apache.shiro.web.filter.mgt.PathMatchingFilterChainResolver;
 import org.apache.shiro.web.servlet.AbstractShiroFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,12 +18,12 @@ import java.util.Map;
  * @date 创建时间：2018
  */
 @Service
-@Configuration
 public class ShiroService {
 
     @Autowired
     ShiroConfiguration shiroConfiguration;
     @Autowired
+    @Lazy
     ShiroFilterFactoryBean shiroFilterFactoryBean;
     //@Autowired
    // PermissionService permissionService;
@@ -32,7 +32,6 @@ public class ShiroService {
      */
     public Map<String, String> updatePermission(List<Permission> s) {
         synchronized (shiroFilterFactoryBean) {
-
             AbstractShiroFilter shiroFilter = null;
             try {
                 shiroFilter = (AbstractShiroFilter) shiroFilterFactoryBean

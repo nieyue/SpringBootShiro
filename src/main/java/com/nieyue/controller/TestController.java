@@ -3,33 +3,22 @@ package com.nieyue.controller;
 import com.nieyue.bean.Permission;
 import com.nieyue.bean.RolePermission;
 import com.nieyue.exception.AccountLoginException;
-import com.nieyue.exception.AccountNotAuthException;
-import com.nieyue.exception.CommonNotRollbackException;
-import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.service.PermissionService;
 import com.nieyue.service.RolePermissionService;
 import com.nieyue.shiro.ShiroService;
 import com.nieyue.shiro.ShiroUtil;
-import com.nieyue.util.HttpClientUtil;
 import com.nieyue.util.MyDESutil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.models.Path;
-import io.swagger.models.Swagger;
-import io.swagger.models.Tag;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.BoundValueOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -92,19 +81,15 @@ public class TestController {
     }
     static AtomicInteger a=new AtomicInteger(1);
     /**
-     * sessionid
+     * 更新权限
      * @return
      */
     @RequestMapping(value = "/us")
     @ApiOperation(value = "更新权限", notes = "更新权限")
     @ResponseBody
     public Map<String, String> updateShiro() {
-        List<Permission> s=new ArrayList<>();
-        Permission p = new Permission();
-        a.incrementAndGet();
-        p.setRoute("/a"+a.toString());
-        s.add(p);
-        Map<String, String> m = shiroService.updatePermission(s);
+        List<Permission> permissionList = permissionService.browsePagingPermission(null, null, null, null, 1, Integer.MAX_VALUE, "permission_id", "asc");
+        Map<String, String> m = shiroService.updatePermission(permissionList);
         return m;
     }
     /**

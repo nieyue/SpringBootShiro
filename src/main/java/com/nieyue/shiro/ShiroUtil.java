@@ -12,6 +12,7 @@ import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +63,14 @@ public class ShiroUtil {
                     permission.setManagerName(tagslist.get(i).getDescription());//权限管理名称
                     permission.setName(ss.get("summary").toString());//权限名称
                     permission.setRoute(entry.getKey());//权限路由
-                    permission.setType(1);//默认鉴权
+                    if(entry.getKey().indexOf("list")>0
+                    		||entry.getKey().indexOf("count")>0
+                    		||entry.getKey().indexOf("load")>0){                    	
+                    	permission.setType(0);//默认开放
+                    }else{
+                    	permission.setType(1);//默认鉴权
+                    	
+                    }
                     b=permissionService.addPermission(permission);
                     // System.out.println("---------------------");
                 }
