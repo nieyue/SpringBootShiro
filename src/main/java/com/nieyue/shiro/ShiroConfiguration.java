@@ -1,7 +1,11 @@
 package com.nieyue.shiro;
 
-import com.nieyue.bean.Permission;
-import com.nieyue.service.PermissionService;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.Filter;
+
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
@@ -10,18 +14,15 @@ import org.apache.shiro.web.session.mgt.DefaultWebSessionManager;
 import org.crazycake.shiro.RedisCacheManager;
 import org.crazycake.shiro.RedisManager;
 import org.crazycake.shiro.RedisSessionDAO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import redis.clients.jedis.JedisPoolConfig;
 
-import javax.servlet.Filter;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import com.nieyue.bean.Permission;
+import com.nieyue.service.PermissionService;
+
+import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * @author: 聂跃
@@ -51,8 +52,8 @@ public class ShiroConfiguration {
     @Value("${spring.redis.pool.max-active}")
     Integer redispoolmaxactive;
     @Autowired
-    PermissionService permissionService;
-    private static final Logger logger = LoggerFactory.getLogger(ShiroConfiguration.class);
+    private PermissionService permissionService;
+    // private static final Logger logger = LoggerFactory.getLogger(ShiroConfiguration.class);
 
     /**
      * 初始化权限
@@ -62,9 +63,14 @@ public class ShiroConfiguration {
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<String, String>();
          /* 过滤链定义，从上向下顺序执行，一般将 / ** 放在最为下边:这是一个坑呢，一不小心代码就不好使了;
           authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访问 */
-        //filterChainDefinitionMap.put("/", "anon");
+        filterChainDefinitionMap.put("/", "anon");
+        filterChainDefinitionMap.put("/swagger-ui.html", "anon");
+        filterChainDefinitionMap.put("/swagger-resources/**", "anon");
+        filterChainDefinitionMap.put("/webjars/**", "anon");
+        filterChainDefinitionMap.put("/v2/**", "anon");
+        filterChainDefinitionMap.put("/home/**", "anon");
         //静态资源开放
-        filterChainDefinitionMap.put("/static/**", "anon");
+        filterChainDefinitionMap.put("/resources/**", "anon");
         //动态权限
         for (Permission per : permissionList) {
             //公共的开放的
@@ -77,6 +83,8 @@ public class ShiroConfiguration {
                         "authc,perms["+per.getRoute()+"]");
             }
         }
+        filterChainDefinitionMap.put("/**/", "authc,perms[nieyue]");//乱写，不允许通过
+        // System.err.println(filterChainDefinitionMap);
         //filterChainDefinitionMap.put("/**", "authc,roles[超级管理员]");
         return filterChainDefinitionMap;
     }
@@ -95,8 +103,9 @@ public class ShiroConfiguration {
         // 登录成功后要跳转的链接
         //shiroFilterFactoryBean.setSuccessUrl("/test/sessionid");
         // 未授权界面;
-       // shiroFilterFactoryBean.setUnauthorizedUrl("/test/unauth");
+        // shiroFilterFactoryBean.setUnauthorizedUrl("/test/unauth");
 
+        filterMap.put("anon", new MyAnonymousFilter());//自定义匿名访问权限
         filterMap.put("authc", new MyAuthenticationFilter());//对没有登陆的，需要跳转的过滤
         filterMap.put("perms", new MyPermissionsAuthorizationFilter());//对权限过滤
         shiroFilterFactoryBean.setFilters(filterMap);
