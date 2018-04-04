@@ -16,6 +16,8 @@ public interface PermissionService {
 	public boolean delPermission(Integer permissionId) ;
 	/** 更新权限*/	
 	public boolean updatePermission(Permission permission);
+	/** 初始化权限 */
+	public boolean initPermission();
 	/** 装载权限 */	
 	public Permission loadPermission(Integer permissionId);	
 	/** 权限总共数目 */	

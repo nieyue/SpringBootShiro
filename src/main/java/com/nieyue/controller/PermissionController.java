@@ -123,6 +123,16 @@ public class PermissionController {
 		return count;
 	}
 	/**
+	 * 初始化权限
+	 * @return
+	 */
+	@ApiOperation(value = "初始化权限", notes = "初始化权限")
+	@RequestMapping(value = "/init", method = {RequestMethod.GET,RequestMethod.POST})
+	public @ResponseBody StateResult initPermission()  {
+		boolean um = permissionService.initPermission();
+		return ResultUtil.getSR(um);
+	}
+	/**
 	 * 权限单个加载
 	 * @return
 	 */

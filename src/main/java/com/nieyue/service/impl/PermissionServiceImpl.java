@@ -3,10 +3,10 @@ package com.nieyue.service.impl;
 import com.nieyue.bean.Permission;
 import com.nieyue.bean.RolePermission;
 import com.nieyue.dao.PermissionDao;
-import com.nieyue.exception.CommonRollbackException;
 import com.nieyue.service.PermissionService;
 import com.nieyue.service.RolePermissionService;
 import com.nieyue.shiro.ShiroService;
+import com.nieyue.shiro.ShiroUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -26,6 +25,18 @@ public class PermissionServiceImpl implements PermissionService{
 	RolePermissionService rolePermissionService;
 	@Resource
 	ShiroService shiroService;
+	@Resource
+	ShiroUtil shiroUtil;
+	/**
+	 * 初始化注册权限
+	 * @return
+	 */
+	@Transactional(propagation=Propagation.REQUIRED)
+	@Override
+	public boolean initPermission() {
+		boolean b = shiroUtil.initPermission();
+		return b;
+	}
 	@Transactional(propagation=Propagation.REQUIRED)
 	@Override
 	public boolean addPermission(Permission permission) {
@@ -45,8 +56,8 @@ public class PermissionServiceImpl implements PermissionService{
 			}
 		}finally {
 			lock.unlock();
-			return b;
 		}
+		return b;
 	}
 	@Transactional(propagation=Propagation.REQUIRED)
 	@Override
