@@ -4,6 +4,7 @@ import com.nieyue.bean.Account;
 import com.nieyue.bean.RolePermission;
 import com.nieyue.util.ResultUtil;
 import net.sf.json.JSONObject;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.authz.PermissionsAuthorizationFilter;
 
@@ -33,14 +34,14 @@ public class MyPermissionsAuthorizationFilter extends PermissionsAuthorizationFi
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         //获取当前账户
-        Subject subject = this.getSubject(servletRequest, servletResponse);
+       Subject subject = this.getSubject(servletRequest, servletResponse);
         //获取当前访问路径
         String[] perms = (String[])((String[])mappedValue);
 //        for (int i = 0; i < perms.length; i++) {
 //            System.out.println(perms[i]);
 //        }
         //System.out.println(request.getParameter("accountId"));
-        Account account = (Account)subject.getSession().getAttribute("account");
+       Account account = (Account)subject.getSession().getAttribute("account");
         List<RolePermission> rolePermissionList = (List<RolePermission>) subject.getSession().getAttribute("rolePermissionList");
 
         //超级管理员拥有所有权限
